@@ -39,7 +39,26 @@ app.post("/api/clear-tokens", (req, res) => {
   res.status(200).send({ message: "Tokens cleared" });
 });
 
-function sendNotification(token, title, body) {}
+function sendNotification(token, title, body) {
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    token: token,
+  };
+
+  admin
+    .messaging()
+    .send(message)
+    .then((response) => {
+      console.log("Successfully sent message:", response);
+    })
+    .catch((error) => {
+      console.log("Error sending message:", error);
+      throw error;
+    });
+}
 
 app.post("/api/send-notification", (req, res) => {
   const title = req.body.title;
@@ -55,25 +74,12 @@ app.post("/api/send-notification", (req, res) => {
   }
 
   tokens.forEach((token) => {
-    const message = {
-      notification: {
-        title: title,
-        body: body,
-      },
-      token: token,
-    };
-
-    admin
-      .messaging()
-      .send(message)
-      .then((response) => {
-        res.status(200).send({ message: `Notification sent: ${response}` });
-      })
-      .catch((error) => {
-        res
-          .status(400)
-          .send({ message: `Error sending notification: ${error}` });
-      });
+    try {
+      sendNotification(token, title, body);
+    } catch (error) {
+      res.status(500).send({ message: "Failed to send notification" });
+      return;
+    }
   });
 
   res.status(200).send({ message: "Notification sent" });
