@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
@@ -8,6 +10,7 @@ const accountData = fs.readFileSync("rhang-fhindel-9cefdb21ebbb.json");
 const serviceAccount = JSON.parse(accountData);
 serviceAccount["private_key_id"] = process.env.FIREBASE_PRIVATE_KEY_ID
 serviceAccount["private_key"] = process.env.FIREBASE_PRIVATE_KEY
+
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
