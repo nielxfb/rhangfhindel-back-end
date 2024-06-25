@@ -56,6 +56,7 @@ function sendNotification(token, title, body) {
     })
     .catch((error) => {
       console.log("Error sending message:", error);
+      throw error;
     });
 }
 
@@ -73,7 +74,12 @@ app.post("/api/send-notification", (req, res) => {
   }
 
   tokens.forEach((token) => {
-    sendNotification(token, title, body);
+    try {
+      sendNotification(token, title, body);
+    } catch (error) {
+      res.status(500).send({ message: "Failed to send notification" });
+      return;
+    }
   });
 
   res.status(200).send({ message: "Notification sent" });
