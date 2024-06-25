@@ -6,7 +6,7 @@ const admin = require("firebase-admin");
 const cors = require("cors");
 const fs = require("fs");
 
-const { privateKey } = process.env.FIREBASE_PRIVATE_KEY;
+const { privateKey } = JSON.parse(process.env.FIREBASE_PRIVATE_KEY);
 
 const accountData = fs.readFileSync("rhang-fhindel-9cefdb21ebbb.json");
 const serviceAccount = JSON.parse(accountData);
