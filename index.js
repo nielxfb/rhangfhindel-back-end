@@ -1,8 +1,13 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
-const serviceAccount = require("./rhang-fhindel-805af72d693a.json");
 const cors = require("cors");
+const fs = require("fs");
+
+const accountData = fs.readFileSync("./rhang-fhindel-805af72d693a.json");
+const serviceAccount = JSON.parse(accountData);
+serviceAccount["private_key_id"] = process.env.FIREBASE_PRIVATE_KEY_ID
+serviceAccount["private_key"] = process.env.FIREBASE_PRIVATE_KEY
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
