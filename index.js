@@ -21,21 +21,41 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const tokens = [];
+const tokens = new Map();
+
+const checkGeneration = (generation) => {
+  const generationRegex = /^[0-9]{2}-[0-9]$/;
+  return generationRegex.test(generation);
+};
 
 app.post("/api/register-token", (req, res) => {
   const token = req.body.token;
+  const generation = req.body.generation;
   if (!token) {
     res.status(400).send({ message: "Token is missing" });
     return;
   }
 
-  if (tokens.includes(token)) {
+  if (!generation) {
+    res.status(400).send({ message: "Generation is missing" });
+    return;
+  }
+
+  if (!checkGeneration(generation)) {
+    res.status(400).send({ message: "Invalid generation format" });
+    return;
+  }
+
+  if (!tokens.has(generation)) {
+    tokens.set(generation, []);
+  }
+
+  if (tokens.get(generation).includes(token)) {
     res.status(400).send({ message: "Token already registered" });
     return;
   }
 
-  tokens.push(token);
+  tokens.get(generation).push(token);
   res.status(200).send({ message: "Token received" });
 });
 
@@ -72,6 +92,8 @@ function sendNotification(token, title, body) {
 app.post("/api/send-notification", (req, res) => {
   const title = req.body.title;
   const body = req.body.body;
+  const onlyForGeneration = req.body.onlyForGeneration;
+
   if (!title) {
     res.status(400).send({ message: "Title is missing" });
     return;
@@ -82,7 +104,32 @@ app.post("/api/send-notification", (req, res) => {
     return;
   }
 
-  tokens.forEach((token) => {
+  if (onlyForGeneration === undefined) {
+    tokens.forEach((value, key) => {
+      value.forEach((token) => {
+        try {
+          sendNotification(token, title, body);
+        } catch (error) {
+          res.status(500).send({ message: "Failed to send notification" });
+          return;
+        }
+      });
+    });
+
+    return;
+  }
+
+  if (!checkGeneration(onlyForGeneration)) {
+    res.status(400).send({ message: "Invalid generation format" });
+    return;
+  }
+
+  if (!tokens.has(onlyForGeneration)) {
+    res.status(400).send({ message: "No tokens for this generation" });
+    return;
+  }
+
+  tokens.get(onlyForGeneration).forEach((token) => {
     try {
       sendNotification(token, title, body);
     } catch (error) {
