@@ -8,7 +8,7 @@ const fs = require("fs");
 
 const { privateKey } = JSON.parse(process.env.FIREBASE_PRIVATE_KEY);
 
-const accountData = fs.readFileSync("rhang-fhindel-9cefdb21ebbb.json");
+const accountData = fs.readFileSync("service-account-credentials.json");
 const serviceAccount = JSON.parse(accountData);
 serviceAccount["private_key_id"] = process.env.FIREBASE_PRIVATE_KEY_ID;
 serviceAccount["private_key"] = privateKey;
