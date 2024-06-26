@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const cors = require("cors");
 const fs = require("fs");
+const cron = require("node-cron");
 
 const { privateKey } = JSON.parse(process.env.FIREBASE_PRIVATE_KEY);
 
@@ -85,7 +86,7 @@ function sendNotification(token, title, body) {
       console.log("Successfully sent message:", response);
     })
     .catch((error) => {
-      console.log("Error sending message:", error);
+      console.error("Error sending message:", error);
       throw error;
     });
 }
@@ -140,6 +141,20 @@ app.post("/api/send-notification", (req, res) => {
   });
 
   res.status(200).send({ message: "Notification sent" });
+});
+
+cron.schedule("59 23 * * *", () => {
+  const db = admin.database();
+  const ref = db.ref();
+
+  ref
+    .remove()
+    .then(() => {
+      console.log("Database cleared successfully");
+    })
+    .catch((error) => {
+      console.error("Error clearing database:", error);
+    });
 });
 
 const port = process.env.PORT || 3000;

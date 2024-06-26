@@ -31,11 +31,9 @@ This project, `rhangfhindel-back-end`, is a Node.js server application designed 
    npm install
    ```
 
-3. Create a `.env` file in the root directory and add the following variables:
-   ```env
-   PORT=3000
-   FIREBASE_PRIVATE_KEY_ID=your_firebase_private_key_id
-   FIREBASE_PRIVATE_KEY="your_firebase_private_key"
+3. Copy the .env.example into a .env file:
+   ```bash
+   cp .env.example .env
    ```
 
 4. Place your Firebase service account credentials file in the root directory and name it `service-account-credentials.json`.
