@@ -60,11 +60,12 @@ app.post("/api/register-token", (req, res) => {
 });
 
 app.get("/api/get-tokens", (req, res) => {
-  res.status(200).send({ tokens: tokens });
+  const object = Object.fromEntries(tokens);
+  res.status(200).send(object);
 });
 
 app.post("/api/clear-tokens", (req, res) => {
-  tokens.length = 0;
+  tokens.clear();
   res.status(200).send({ message: "Tokens cleared" });
 });
 
