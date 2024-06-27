@@ -143,7 +143,7 @@ app.post("/api/send-notification", (req, res) => {
   res.status(200).send({ message: "Notification sent" });
 });
 
-cron.schedule("59 23 * * *", () => {
+const clearJob = cron.schedule("59 23 * * *", () => {
   const db = admin.database();
   const ref = db.ref();
 
@@ -161,4 +161,9 @@ const port = process.env.PORT || 3000;
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
+  if (clearJob !== undefined) {
+    console.log("Clear job is scheduled at", clearJob.nextDates().toString(), ".")
+  } else {
+    console.log("Clear job is not yet scheduled.")
+  }
 });
