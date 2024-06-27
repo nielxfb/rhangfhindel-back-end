@@ -6,6 +6,7 @@ const admin = require("firebase-admin");
 const cors = require("cors");
 const fs = require("fs");
 const cron = require("node-cron");
+const cronParser = require("cron-parser");
 
 const { privateKey } = JSON.parse(process.env.FIREBASE_PRIVATE_KEY);
 
@@ -16,6 +17,7 @@ serviceAccount["private_key"] = privateKey;
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
 
 const app = express();
@@ -143,27 +145,37 @@ app.post("/api/send-notification", (req, res) => {
   res.status(200).send({ message: "Notification sent" });
 });
 
-const clearJob = cron.schedule("59 23 * * *", () => {
-  const db = admin.database();
-  const ref = db.ref();
+const scheduleString = "59 23 * * *";
+const clearJob = cron.schedule(
+  scheduleString,
+  () => {
+    console.log("Clearing database..")
 
-  ref
-    .remove()
-    .then(() => {
-      console.log("Database cleared successfully");
-    })
-    .catch((error) => {
-      console.error("Error clearing database:", error);
-    });
-});
+    const db = admin.database();
+    const ref = db.ref();
+
+    ref
+      .remove()
+      .then(() => {
+        console.log("Database cleared successfully");
+      })
+      .catch((error) => {
+        console.error("Error clearing database:", error);
+      });
+  },
+  {
+    scheduled: true,
+    timezone: process.env.TZ,
+  }
+);
 
 const port = process.env.PORT || 3000;
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
   if (clearJob !== undefined) {
-    console.log("Clear job is scheduled at", clearJob.nextDates().toString(), ".")
+    console.log("Clear database job is scheduled at", new Date(cronParser.parseExpression(scheduleString).next()).toTimeString(),"everyday.");
   } else {
-    console.log("Clear job is not yet scheduled.")
+    console.log("Clear database job is not yet scheduled.");
   }
 });
