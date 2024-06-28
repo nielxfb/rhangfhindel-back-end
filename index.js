@@ -108,7 +108,7 @@ app.post("/api/send-notification", (req, res) => {
     return;
   }
 
-  if (onlyForGeneration === undefined) {
+  if (onlyForGeneration === "None") {
     tokens.forEach((value, key) => {
       value.forEach((token) => {
         try {
