@@ -145,6 +145,35 @@ app.post("/api/send-notification", (req, res) => {
   res.status(200).send({ message: "Notification sent" });
 });
 
+app.post("/api/send-personal-notification", (req, res) => {
+  const title = req.body.title;
+  const body = req.body.body;
+
+  if (!title) {
+    res.status(400).send({ message: "Title is missing" });
+    return;
+  }
+
+  if (!body) {
+    res.status(400).send({ message: "Body is missing" });
+    return;
+  }
+
+  const token = req.body.token;
+
+  if (!token) {
+    res.status(400).send({ message: "Token is missing" });
+    return;
+  }
+
+  try {
+    sendNotification(token, title, body);
+  } catch (error) {
+    res.status(500).send({ message: "Failed to send notification" });
+    return;
+  }
+})
+
 const scheduleString = "59 23 * * *";
 const clearJob = cron.schedule(
   scheduleString,
